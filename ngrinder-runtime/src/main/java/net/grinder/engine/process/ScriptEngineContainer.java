@@ -21,9 +21,8 @@
 
 package net.grinder.engine.process;
 
-import static net.grinder.util.ClassLoaderUtilities.allResourceLines;
+import static java.util.Arrays.asList;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +41,7 @@ import org.slf4j.Logger;
 
 
 /**
- * Container for script engines.
+ * Container for script engines. (modified for nGrinder)
  *
  * @author Philip Aston
  */
@@ -50,6 +49,10 @@ final class ScriptEngineContainer {
 
 	private final MutablePicoContainer m_container =
 		new DefaultPicoContainer(new Caching());
+
+	protected static final List<String> IMPLEMENTATION_NAMES =
+		asList("net.grinder.scriptengine.jython.JythonScriptEngineService",
+			   "net.grinder.scriptengine.groovy.GroovyScriptEngineService");
 
 	public ScriptEngineContainer(GrinderProperties properties,
 								 Logger logger,
@@ -65,18 +68,7 @@ final class ScriptEngineContainer {
 			m_container.addComponent(dcrContext);
 		}
 
-		final List<String> implementationNames;
-
-		try {
-			implementationNames =
-				allResourceLines(getClass().getClassLoader(),
-					ScriptEngineService.RESOURCE_NAME);
-		}
-		catch (IOException e) {
-			throw new EngineException("Failed to load script engine", e);
-		}
-
-		for (String implementationName : implementationNames) {
+		for (String implementationName : IMPLEMENTATION_NAMES) {
 			try {
 				final Class<?> implementationClass = Class.forName(implementationName);
 
